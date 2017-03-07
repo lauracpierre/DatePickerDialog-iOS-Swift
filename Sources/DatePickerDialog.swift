@@ -19,7 +19,7 @@ open class DatePickerDialog: UIView {
     private var dialogView:   UIView!
     private var titleLabel:   UILabel!
     open var datePicker:    UIDatePicker!
-    private var cancelButton: UIButton!
+    private var cancelButton: UIButton?
     private var doneButton:   UIButton!
     
     // MARK: - Variables
@@ -27,7 +27,13 @@ open class DatePickerDialog: UIView {
     private var datePickerMode: UIDatePickerMode?
     private var callback:       DatePickerCallback?
     var showCancelButton:Bool = false
-    
+  
+    open var buttonsFont: UIFont? {
+        didSet {
+            self.changeButtonsFont(font: self.buttonsFont)
+        }
+    }
+  
     // MARK: - Dialog initialization
     public init(showCancelButton:Bool = true) {
         super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: UIScreen.main.bounds.size.height))
@@ -69,7 +75,7 @@ open class DatePickerDialog: UIView {
         self.titleLabel.text = title
         self.doneButton.setTitle(doneButtonTitle, for: .normal)
         if showCancelButton {
-            self.cancelButton.setTitle(cancelButtonTitle, for: .normal)
+            self.cancelButton?.setTitle(cancelButtonTitle, for: .normal)
         }
         self.datePickerMode = datePickerMode
         self.callback = callback
@@ -220,25 +226,31 @@ open class DatePickerDialog: UIView {
         
         if showCancelButton {
             self.cancelButton = UIButton(type: .custom) as UIButton
-            self.cancelButton.frame = isLeftToRightDirection ? leftButtonFrame : rightButtonFrame
-            self.cancelButton.setTitleColor(UIColor(red: 0, green: 0.5, blue: 1, alpha: 1), for: .normal)
-            self.cancelButton.setTitleColor(UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.5), for: .highlighted)
-            self.cancelButton.titleLabel!.font = UIFont.boldSystemFont(ofSize: 14)
-            self.cancelButton.layer.cornerRadius = kDatePickerDialogCornerRadius
-            self.cancelButton.addTarget(self, action: .buttonTapped, for: .touchUpInside)
-            container.addSubview(self.cancelButton)
+            self.cancelButton!.frame = isLeftToRightDirection ? leftButtonFrame : rightButtonFrame
+            self.cancelButton!.setTitleColor(UIColor(red: 0, green: 0.5, blue: 1, alpha: 1), for: .normal)
+            self.cancelButton!.setTitleColor(UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.5), for: .highlighted)
+            self.cancelButton!.layer.cornerRadius = kDatePickerDialogCornerRadius
+            self.cancelButton!.addTarget(self, action: .buttonTapped, for: .touchUpInside)
+            container.addSubview(self.cancelButton!)
         }
         self.doneButton = UIButton(type: .custom) as UIButton
         self.doneButton.frame = isLeftToRightDirection ? rightButtonFrame : leftButtonFrame
         self.doneButton.tag = kDatePickerDialogDoneButtonTag
         self.doneButton.setTitleColor(UIColor(red: 0, green: 0.5, blue: 1, alpha: 1), for: .normal)
         self.doneButton.setTitleColor(UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 0.5), for: .highlighted)
-        self.doneButton.titleLabel!.font = UIFont.boldSystemFont(ofSize: 14)
         self.doneButton.layer.cornerRadius = kDatePickerDialogCornerRadius
         self.doneButton.addTarget(self, action: .buttonTapped, for: .touchUpInside)
         container.addSubview(self.doneButton)
+      
+        // Setting default Font
+        self.changeButtonsFont(font: nil)
     }
-    
+  
+    private func changeButtonsFont(font: UIFont?) {
+        self.doneButton.titleLabel?.font = font ?? UIFont.boldSystemFont(ofSize: 14)
+        self.cancelButton?.titleLabel?.font = font ?? UIFont.boldSystemFont(ofSize: 14)
+    }
+  
     func buttonTapped(sender: UIButton!) {
         if sender.tag == kDatePickerDialogDoneButtonTag {
             self.callback?(self.datePicker.date)
